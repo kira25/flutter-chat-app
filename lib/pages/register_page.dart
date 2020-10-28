@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/helpers/show_alert.dart';
 import 'package:flutter_chat/services/auth_service.dart';
+import 'package:flutter_chat/services/socket_service.dart';
 import 'package:flutter_chat/widgets/btn_azul.dart';
 import 'package:flutter_chat/widgets/custom_input.dart';
 import 'package:flutter_chat/widgets/labels.dart';
@@ -51,6 +52,7 @@ class __FormState extends State<_Form> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
+    final socketService = Provider.of<SocketService>(context);
 
     Function onPress = () async {
       print('email controllerr :${emailCtrl.text}');
@@ -60,6 +62,7 @@ class __FormState extends State<_Form> {
           usernameCtrl.text.trim(), passCtrl.text.trim());
       if (registerOk) {
         //TODO : connect to socket server
+        socketService.connect();
         Navigator.pushReplacementNamed(context, 'users');
       } else {
         showAlert(context, 'Register incorrect', 'Correo registrado');

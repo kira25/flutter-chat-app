@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/helpers/show_alert.dart';
 import 'package:flutter_chat/services/auth_service.dart';
+import 'package:flutter_chat/services/socket_service.dart';
 import 'package:flutter_chat/widgets/btn_azul.dart';
 import 'package:flutter_chat/widgets/custom_input.dart';
 import 'package:flutter_chat/widgets/labels.dart';
@@ -50,18 +51,20 @@ class __FormState extends State<_Form> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
-
-    Function onPress = () async{
+    final socketService = Provider.of<SocketService>(context);
+    Function onPress = () async {
       print('email controllerr :${emailCtrl.text}');
       print('pass controllerr :${passCtrl.text}');
 
       FocusScope.of(context).unfocus();
-      final loginOk = await authService.login(emailCtrl.text.trim(), passCtrl.text.trim());
-      if(loginOk){
-          //TODO: Connect to socket server
+      final loginOk =
+          await authService.login(emailCtrl.text.trim(), passCtrl.text.trim());
+      if (loginOk) {
+        //TODO: Connect to socket server
+        socketService.connect();
         Navigator.pushReplacementNamed(context, 'users');
         //Navigate to other page
-      }else{
+      } else {
         showAlert(context, 'Login incorrect', 'Check your credentials');
         //Show Alert
       }
