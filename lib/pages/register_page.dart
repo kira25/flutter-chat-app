@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/helpers/show_alert.dart';
+import 'package:flutter_chat/services/auth_service.dart';
 import 'package:flutter_chat/widgets/btn_azul.dart';
 import 'package:flutter_chat/widgets/custom_input.dart';
 import 'package:flutter_chat/widgets/labels.dart';
 import 'package:flutter_chat/widgets/logo.dart';
+import 'package:provider/provider.dart';
 
 class RegisterPage extends StatelessWidget {
   @override
@@ -22,7 +25,9 @@ class RegisterPage extends StatelessWidget {
                   ),
                   _Form(),
                   Labels(
-                    route: 'login',title: 'Ya tienes una cuenta?',subtitle: 'Ingresa ahora',
+                    route: 'login',
+                    title: 'Ya tienes una cuenta?',
+                    subtitle: 'Ingresa ahora',
                   ),
                   Text('Terminos y condiciones de uso')
                 ],
@@ -45,9 +50,20 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
-    Function onPress = () {
+    final authService = Provider.of<AuthService>(context);
+
+    Function onPress = () async {
       print('email controllerr :${emailCtrl.text}');
+      print('email controllerr :${usernameCtrl.text}');
       print('pass controllerr :${passCtrl.text}');
+      final registerOk = await authService.register(emailCtrl.text.trim(),
+          usernameCtrl.text.trim(), passCtrl.text.trim());
+      if (registerOk) {
+        //TODO : connect to socket server
+        Navigator.pushReplacementNamed(context, 'users');
+      } else {
+        showAlert(context, 'Register incorrect', 'Correo registrado');
+      }
     };
     return Container(
       margin: EdgeInsets.only(top: 40),
@@ -61,20 +77,20 @@ class __FormState extends State<_Form> {
             keyboardType: TextInputType.emailAddress,
           ),
           CustomInput(
-            isPassword: true,
             icon: Icons.lock,
             placeholder: 'Email',
             textEditingController: emailCtrl,
             keyboardType: TextInputType.text,
           ),
           CustomInput(
+            isPassword: true,
             icon: Icons.perm_identity,
             placeholder: 'Password',
             textEditingController: passCtrl,
             keyboardType: TextInputType.emailAddress,
           ),
           BlueButton(
-            onPress: onPress,
+            onPress: authService.authenticate ? null : onPress,
             text: 'Enter',
           )
         ],

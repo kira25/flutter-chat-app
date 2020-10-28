@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/helpers/show_alert.dart';
+import 'package:flutter_chat/services/auth_service.dart';
 import 'package:flutter_chat/widgets/btn_azul.dart';
 import 'package:flutter_chat/widgets/custom_input.dart';
 import 'package:flutter_chat/widgets/labels.dart';
 import 'package:flutter_chat/widgets/logo.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -13,13 +16,19 @@ class LoginPage extends StatelessWidget {
           child: SingleChildScrollView(
             physics: BouncingScrollPhysics(),
             child: Container(
-              height: MediaQuery.of(context).size.height*0.9,
+              height: MediaQuery.of(context).size.height * 0.9,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Logo(title: 'Messenger',),
+                  Logo(
+                    title: 'Messenger',
+                  ),
                   _Form(),
-                  Labels(route: 'register',title: 'No tienes cuenta?',subtitle: 'Crear una ahora!',),
+                  Labels(
+                    route: 'register',
+                    title: 'No tienes cuenta?',
+                    subtitle: 'Crear una ahora!',
+                  ),
                   Text('Terminos y condiciones de uso')
                 ],
               ),
@@ -40,9 +49,22 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
-    Function onPress = () {
+    final authService = Provider.of<AuthService>(context);
+
+    Function onPress = () async{
       print('email controllerr :${emailCtrl.text}');
       print('pass controllerr :${passCtrl.text}');
+
+      FocusScope.of(context).unfocus();
+      final loginOk = await authService.login(emailCtrl.text.trim(), passCtrl.text.trim());
+      if(loginOk){
+          //TODO: Connect to socket server
+        Navigator.pushReplacementNamed(context, 'users');
+        //Navigate to other page
+      }else{
+        showAlert(context, 'Login incorrect', 'Check your credentials');
+        //Show Alert
+      }
     };
     return Container(
       margin: EdgeInsets.only(top: 40),
@@ -63,7 +85,7 @@ class __FormState extends State<_Form> {
             keyboardType: TextInputType.text,
           ),
           BlueButton(
-            onPress: onPress,
+            onPress: authService.authenticate ? null : onPress,
             text: 'Enter',
           )
         ],

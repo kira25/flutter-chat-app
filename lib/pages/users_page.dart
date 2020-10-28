@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/models/users.dart';
+import 'package:flutter_chat/services/auth_service.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class UsersPage extends StatefulWidget {
@@ -12,18 +14,22 @@ class _UsersPageState extends State<UsersPage> {
       RefreshController(initialRefresh: false);
 
   final users = [
-    Users(uid: '1', name: 'Maria', email: 'test1@gmail.com', online: true),
-    Users(uid: '2', name: 'Jose', email: 'test2@gmail.com', online: true),
-    Users(uid: '3', name: 'Alberto', email: 'test3@gmail.com', online: false),
-    Users(uid: '4', name: 'Fernando', email: 'test4@gmail.com', online: true),
+    User(uid: '1', name: 'Maria', email: 'test1@gmail.com', online: true),
+    User(uid: '2', name: 'Jose', email: 'test2@gmail.com', online: true),
+    User(uid: '3', name: 'Alberto', email: 'test3@gmail.com', online: false),
+    User(uid: '4', name: 'Fernando', email: 'test4@gmail.com', online: true),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+    final user = authService.user;
+
     return Scaffold(
         appBar: AppBar(
+          centerTitle: true,
           title: Text(
-            'Mi nombre',
+            user.name,
             style: TextStyle(color: Colors.black),
           ),
           elevation: 1,
@@ -40,7 +46,11 @@ class _UsersPageState extends State<UsersPage> {
           leading: IconButton(
               icon: Icon(Icons.exit_to_app),
               color: Colors.black,
-              onPressed: () {}),
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, 'login');
+                AuthService.deleteToken();
+                //TODO: Disconnect socket server
+              }),
         ),
         body: SmartRefresher(
           onRefresh: _loadUsers,
@@ -63,7 +73,7 @@ class _UsersPageState extends State<UsersPage> {
     );
   }
 
-  ListTile _userListTile(Users user) {
+  ListTile _userListTile(User user) {
     return ListTile(
       title: Text(user.name),
       leading: CircleAvatar(
